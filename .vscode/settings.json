@@ -1,5 +1,12 @@
 {
   "files.associations": {
-    "string_view": "c"
+    "string_view": "c",
+    "charconv": "c",
+    "ratio": "c",
+    "array": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c"
   }
 }

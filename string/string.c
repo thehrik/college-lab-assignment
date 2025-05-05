@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "../result/result.h"
+#include "../types/types.h"
 
 String *String_new(size_t init_capacity)
 {
@@ -51,33 +52,40 @@ void String_destroy(String *s)
 
 ResultString String_read_line(String *s)
 {
+  if (!s)
+  {
+    return (ResultString){RESULT_ERR, .data.err = "Null String pointer"};
+  }
+
+  s->length = 0; // Reset the string for new input
+  if (s->capacity == 0)
+  {
+    s->data = malloc(16);
+    if (!s->data)
+    {
+      return (ResultString){RESULT_ERR, .data.err = "Memory allocation failed"};
+    }
+    s->capacity = 16;
+    s->data[0] = '\0';
+  }
+
   while (1)
   {
     int c = getchar();
-    if (c == '\n')
-    {
-      break; // End of line
-    }
-    if (c == EOF)
-    {
-      if (s->length == 0)
-      {
-        // No data read, true EOF
-        return (ResultString){RESULT_ERR, "EOF reached without reading any data"};
-      }
-      else
-      {
-        // Return what we have, but signal EOF
-        break;
-      }
-    }
-    char ch[2];
-    ch[0] = (char)c;
-    ch[1] = '\0';
+    if (c == '\n' || c == EOF)
+      break;
+
+    char ch[2] = {(char)c, '\0'};
     if (!String_append(s, ch))
     {
-      return (ResultString){RESULT_ERR, "Memory allocation failed"};
+      return (ResultString){RESULT_ERR, .data.err = "Memory allocation failed"};
     }
   }
-  return (ResultString){RESULT_OK, NULL}; // Success
+
+  if (s->length == 0 && feof(stdin))
+  {
+    return (ResultString){RESULT_ERR, .data.err = "EOF reached without reading any data"};
+  }
+
+  return (ResultString){RESULT_OK, .data.ok = s};
 }

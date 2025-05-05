@@ -1,6 +1,7 @@
 #include "vector.h"
 #include <stdlib.h>
 #include "../result/result.h"
+#include "../types/types.h"
 
 VecInt *VecInt_new(size_t init_capacity)
 {
@@ -25,12 +26,12 @@ ResultVecInt VecInt_append(VecInt *vec, int value)
     size_t new_capacity = (vec->capacity == 0) ? 1 : vec->capacity * 2;
     int *new_data = realloc(vec->data, new_capacity * sizeof(int));
     if (!new_data)
-      return (ResultVecInt){RESULT_ERR, "Memory allocation failed"};
+      return (ResultVecInt){RESULT_ERR, .data.err = "Memory allocation failed"};
     vec->data = new_data;
     vec->capacity = new_capacity;
   }
   vec->data[vec->length++] = value;
-  return (ResultVecInt){RESULT_OK, NULL};
+  return (ResultVecInt){RESULT_OK, .data.ok = vec};
 }
 
 void VecInt_destroy(VecInt *vec)

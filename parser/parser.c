@@ -5,9 +5,10 @@
 
 ResultInt parse_to_int(const char *str)
 {
+
   if (str == NULL || *str == '\0')
   {
-    return (ResultInt){RESULT_ERR, 0, "Input string is empty"};
+    return (ResultInt){RESULT_ERR, .data.err = "Input string is empty"};
   }
 
   int sign = 1;
@@ -19,7 +20,7 @@ ResultInt parse_to_int(const char *str)
 
   if (*str < '0' || *str > '9')
   {
-    return (ResultInt){RESULT_ERR, 0, "No digits found after sign"};
+    return (ResultInt){RESULT_ERR, .data.err = "No digits found after sign"};
   }
 
   int num = 0;
@@ -32,8 +33,8 @@ ResultInt parse_to_int(const char *str)
   // If there are any non-digit characters left, it's an error
   if (*str != '\0')
   {
-    return (ResultInt){RESULT_ERR, 0, "Invalid character in input"};
+  return (ResultInt){RESULT_ERR, .data.err = "Invalid character in input string"};
   }
 
-  return (ResultInt){RESULT_OK, sign * num, NULL};
+  return (ResultInt){RESULT_OK, .data.value = sign * num};
 }

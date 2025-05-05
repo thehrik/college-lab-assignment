@@ -3,13 +3,8 @@
 
 #include <stddef.h> // for size_t
 #include "../result/result.h"
+#include "../types/types.h"
 
-typedef struct
-{
-  int *data;
-  size_t length;
-  size_t capacity;
-} VecInt;
 
 VecInt *VecInt_new(size_t init_capacity);
 ResultVecInt VecInt_append(VecInt *vec, int value);

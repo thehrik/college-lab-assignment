@@ -2,14 +2,8 @@
 #define STRING_H
 
 #include <stddef.h> // for size_t
-#include "../result/result.h" 
-
-typedef struct
-{
-    char *data;
-    size_t length;
-    size_t capacity;
-} String;
+#include "../result/result.h"
+#include "../types/types.h"
 
 String *String_new(size_t init_capacity);
 int String_append(String *s, const char *suffix);
