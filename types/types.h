@@ -1,7 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-# include <stddef.h> // for size_t
+#include <stddef.h> // for size_t
 
 typedef struct
 {

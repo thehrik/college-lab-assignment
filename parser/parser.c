@@ -33,8 +33,8 @@ ResultInt parse_to_int(const char *str)
   // If there are any non-digit characters left, it's an error
   if (*str != '\0')
   {
-  return (ResultInt){RESULT_ERR, .data.err = "Invalid character in input string"};
+    return (ResultInt){RESULT_ERR, .data.err = "Invalid character in input string"};
   }
 
-  return (ResultInt){RESULT_OK, .data.value = sign * num};
+  return (ResultInt){RESULT_OK, .data.ok = sign * num};
 }

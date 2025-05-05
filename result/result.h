@@ -14,29 +14,29 @@ typedef struct
   ResultStatus status;
   union
   {
-    int value; // The parsed integer (valid if status == RESULT_OK)
-    const char *err;
-  } data; // Error message (valid if status == RESULT_ERR)
+    int ok;          // (valid if status == RESULT_OK)
+    const char *err; // Error message (valid if status == RESULT_ERR)
+  } data;
 } ResultInt;
 
 typedef struct
 {
-  ResultStatus status; // The parsed string (valid if status == RESULT_OK)
+  ResultStatus status;
   union
   {
-    String *ok; // The parsed integer (valid if status == RESULT_OK)
-    const char *err;
-  } data; // Error message (valid if status == RESULT_ERR)
+    String *ok;      // (valid if status == RESULT_OK)
+    const char *err; // Error message (valid if status == RESULT_ERR)
+  } data;
 } ResultString;
 
 typedef struct
 {
-  ResultStatus status; // The parsed vector (valid if status == RESULT_OK)
+  ResultStatus status;
   union
   {
-    VecInt *ok; // The parsed integer (valid if status == RESULT_OK)
-    const char *err;
-  } data; // Error message (valid if status == RESULT_ERR)
+    VecInt *ok;      // (valid if status == RESULT_OK)
+    const char *err; // Error message (valid if status == RESULT_ERR)
+  } data;
 } ResultVecInt;
 
 #endif // RESULT_H

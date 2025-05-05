@@ -91,7 +91,7 @@ ResultGetInt get_int()
       }
       else
       {
-        result = ri.data.value;
+        result = ri.data.ok;
         String_destroy(s); // Free memory before breaking
         break;
       }
