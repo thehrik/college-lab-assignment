@@ -34,7 +34,7 @@ typedef struct
   ResultStatus status;
   union
   {
-    VecInt *ok;      // (valid if status == RESULT_OK)
+    Vec *ok;      // (valid if status == RESULT_OK)
     const char *err; // Error message (valid if status == RESULT_ERR)
   } data;
 } ResultVecInt;

@@ -5,8 +5,9 @@
 #include "../result/result.h"
 #include "../types/types.h"
 
-VecInt *VecInt_new(size_t init_capacity);
-ResultVecInt VecInt_append(VecInt *vec, int value);
-void VecInt_destroy(VecInt *s);
+Vec *vec_new(size_t elem_size, size_t init_capacity);
+int vec_append(Vec *vec, void *elem);
+void *vec_get(Vec *vec, size_t index);
+void vec_destroy(Vec *vec);
 
 #endif // VECTOR_H

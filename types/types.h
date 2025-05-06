@@ -3,12 +3,12 @@
 
 #include <stddef.h> // for size_t
 
-typedef struct
-{
-  int *data;
+typedef struct {
+  void *data;
   size_t length;
   size_t capacity;
-} VecInt;
+  size_t elem_size;
+} Vec;
 
 typedef struct String
 {
@@ -16,5 +16,6 @@ typedef struct String
   size_t length;
   size_t capacity;
 } String;
+
 
 #endif // TYPES_H
