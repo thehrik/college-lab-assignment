@@ -103,6 +103,7 @@ Mat *mat_new(int nrows, int ncols)
   return mat;
 }
 
+// returns the value of the element at row i, column j
 int matrix_get(Mat *mat, int i, int j)
 {
   Vec *row = *(Vec **)vec_get(mat->rows, i);
@@ -115,6 +116,7 @@ void matrix_set(Mat *mat, int i, int j, int value)
   ((int *)row->data)[j] = value;
 }
 
+// reads the elements of the matrix from the user
 void mat_input(Mat *mat)
 {
   for (int i = 0; i < mat->nrows; i++)
@@ -128,6 +130,7 @@ void mat_input(Mat *mat)
   }
 }
 
+// prints the matrix
 void print_mat(Mat *mat)
 {
   for (int i = 0; i < mat->nrows; i++)
@@ -140,6 +143,7 @@ void print_mat(Mat *mat)
   }
 }
 
+// adds two matrices and returns the result
 Mat *mat_add(Mat *mat1, Mat *mat2)
 {
   if (mat1->nrows != mat2->nrows || mat1->ncols != mat2->ncols)
@@ -158,6 +162,7 @@ Mat *mat_add(Mat *mat1, Mat *mat2)
   return mat;
 }
 
+// gets an integer from the user
 ResultGetInt get_int()
 {
   int result;
@@ -202,6 +207,7 @@ ResultGetInt get_int()
   return (ResultGetInt){GET_OK, result, NULL};
 }
 
+// frees the memory allocated for the matrix
 void mat_destroy(Mat *mat)
 {
   for (int i = 0; i < mat->nrows; i++)
