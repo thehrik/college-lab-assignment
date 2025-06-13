@@ -17,15 +17,15 @@ typedef enum
 typedef struct
 {
   GetResultStatus status;
-  int value;         // The parsed integer (valid if status == RESULT_OK)
-  const char *error; // Error message (valid if status == RESULT_ERR)
+  int value;         // The parsed integer (valid if status == OK)
+  const char *error; // Error message (valid if status == ERR)
 } ResultGetInt;
 
 // type definitions for get result of vector of integers
 typedef struct
 {
-  GetResultStatus status; // The parsed vector (valid if status == RESULT_OK)
-  const char *error;      // Error message (valid if status == RESULT_ERR)
+  GetResultStatus status; // The parsed vector (valid if status == OK)
+  const char *error;      // Error message (valid if status == ERR)
 } ResultGetVecInt;
 
 // Function prototypes
@@ -96,10 +96,10 @@ ResultGetInt get_int()
       return (ResultGetInt){GET_ERR, 0, "memory allocation failed\n"};
     }
     printf("enter integer: ");
-    ResultString rs = String_read_line(s);
-    if (rs.status == RESULT_ERR)
+    Result rs = String_read_line(s);
+    if (rs.status == ERR)
     {
-      fprintf(stderr, "Error: %s\n", rs.data.err);
+      fprintf(stderr, "Error: %s\n", rs.data.err_str);
       String_destroy(s); // Free memory before continuing
       continue;
     }
@@ -110,10 +110,10 @@ ResultGetInt get_int()
         String_destroy(s); // Free memory before breaking
         return (ResultGetInt){GET_STOPPED, 0, NULL};
       }
-      ResultInt ri = parse_to_int(s->data);
-      if (ri.status == RESULT_ERR)
+      Result ri = parse_to_int(s->data);
+      if (ri.status == ERR)
       {
-        fprintf(stderr, "Error: %s\n", ri.data.err);
+        fprintf(stderr, "Error: %s\n", ri.data.err_str);
         String_destroy(s); // Free memory before continuing
         continue;
       }

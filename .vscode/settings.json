@@ -8,6 +8,15 @@
     "tuple": "c",
     "type_traits": "c",
     "utility": "c",
-    "parser.h": "c"
+    "parser.h": "c",
+    "input.h": "c",
+    "result.h": "c",
+    "types.h": "c",
+    "stdlib.h": "c",
+    "chrono": "c",
+    "optional": "c",
+    "format": "c",
+    "ranges": "c",
+    "system_error": "c"
   }
 }

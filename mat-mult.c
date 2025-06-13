@@ -1,24 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "./string/string.h"
-#include "./result/result.h"
-#include "./parser/parser.h"
-#include "./vector/vector.h"
-
-typedef enum
-{
-  GET_OK,
-  GET_ERR,
-  GET_STOPPED,
-} GetResultStatus;
-
-// type definitions for get result of integer
-typedef struct
-{
-  GetResultStatus status;
-  int value;         // The parsed integer (valid if status == RESULT_OK)
-  const char *error; // Error message (valid if status == RESULT_ERR)
-} ResultGetInt;
+#include "./string/string.h" // Assuming String_new, String_read_line, String_destroy, ResultString, ERR
+#include "./result/result.h" // Assuming Result, ERR, OK
+#include "./vector/vector.h" // Assuming Vec, vec_new, vec_append, vec_get, vec_destroy
+#include "./input/input.h"   // Assuming int_read_line, destroy_read_result, ReadResult, READ_ERR, READ_OK, READ_STOPPED
+#include "./types/types.h"   // Assuming common type definitions if any are used by the above
 
 typedef struct
 {
@@ -27,79 +13,192 @@ typedef struct
   int ncols;
 } Mat;
 
-// Function prototypes
-ResultGetInt get_int();
+// --- Function Prototypes ---
 Mat *mat_new(int rows, int cols);
-void mat_input(Mat *mat);
+ReadResult mat_input(Mat *mat);
 void print_mat(Mat *mat);
 int matrix_get(Mat *mat, int i, int j);
 void matrix_set(Mat *mat, int i, int j, int value);
 Mat *mat_mult(Mat *mat1, Mat *mat2);
 void mat_destroy(Mat *mat);
 
-// Main function
+// Helper function to get an integer input with error handling
+// Returns the valid integer (must be positive), or 0 if an error occurred or input was stopped.
+int get_dimension_input(const char *prompt_text);
+
+// --- Main Function ---
 int main()
 {
-  int rows, cols;
-  printf("Matrix addition program\n");
-  printf("Enter the rows and columns of the first matrix: \n");
-  printf("Enter number of rows:");
-  rows = get_int().value;
-  printf("Enter number of columns: ");
-  cols = get_int().value;
-  Mat *mat1 = mat_new(rows, cols);
+  int rows1, cols1;
+  int rows2, cols2;
+  Mat *mat1 = NULL;
+  Mat *mat2 = NULL;
+  Mat *result_mat = NULL;
+
+  printf("--- Matrix Multiplication Program ---\n");
+
+  // --- Input for the first matrix dimensions ---
+  printf("\n--- First Matrix Dimensions ---\n");
+  rows1 = get_dimension_input("Enter number of rows for matrix 1: ");
+  if (rows1 == 0)
+    return 1; // get_dimension_input returns 0 on error/stop
+  cols1 = get_dimension_input("Enter number of columns for matrix 1: ");
+  if (cols1 == 0)
+    return 1;
+
+  mat1 = mat_new(rows1, cols1);
   if (!mat1)
   {
-    fprintf(stderr, "Error: Memory allocation failed\n");
+    fprintf(stderr, "Error: Memory allocation failed for matrix 1.\n");
     return 1;
   }
-  printf("Enter the elements of the first matrix:\n");
-  mat_input(mat1);
 
-  printf("Enter the rows and columns of the second matrix: \n");
-  printf("Enter number of rows:");
-  rows = get_int().value;
-  printf("Enter number of columns: ");
-  cols = get_int().value;
-  Mat *mat2 = mat_new(rows, cols);
+  printf("Enter elements for the first matrix:\n");
+  ReadResult rm1 = mat_input(mat1);
+  if (rm1.status != READ_OK)
+  {
+    fprintf(stderr, "Error during input for matrix 1.\n");
+    destroy_read_result(&rm1); // Clean up result if not OK
+    mat_destroy(mat1);
+    return 1;
+  }
+  destroy_read_result(&rm1); // Destroy result if OK
+
+  // --- Input for the second matrix dimensions ---
+  printf("\n--- Second Matrix Dimensions ---\n");
+  rows2 = get_dimension_input("Enter number of rows for matrix 2: ");
+  if (rows2 == 0)
+  {
+    mat_destroy(mat1); // Clean up mat1 before exiting
+    return 1;
+  }
+  cols2 = get_dimension_input("Enter number of columns for matrix 2: ");
+  if (cols2 == 0)
+  {
+    mat_destroy(mat1); // Clean up mat1 before exiting
+    return 1;
+  }
+
+  mat2 = mat_new(rows2, cols2);
   if (!mat2)
   {
-    fprintf(stderr, "Error: Memory allocation failed\n");
-    free(mat1->rows);
-    free(mat1);
+    fprintf(stderr, "Error: Memory allocation failed for matrix 2.\n");
+    mat_destroy(mat1); // Clean up mat1
     return 1;
   }
-  printf("Enter the elements of the second matrix:\n");
-  mat_input(mat2);
 
-  Mat *result = mat_mult(mat1, mat2);
-  if (!result)
+  printf("Enter elements for the second matrix:\n");
+  ReadResult rm2 = mat_input(mat2);
+  if (rm2.status != READ_OK)
   {
-    fprintf(stderr, "Error: Memory allocation failed\n");
-    free(mat1->rows);
-    free(mat1);
-    free(mat2->rows);
-    free(mat2);
+    fprintf(stderr, "Error during input for matrix 2.\n");
+    destroy_read_result(&rm2); // Clean up result if not OK
+    mat_destroy(mat1);
+    mat_destroy(mat2);
     return 1;
   }
-  print_mat(result);
-  mat_destroy(result); // free memory before exiting program
+  destroy_read_result(&rm2); // Destroy result if OK
+
+  // --- Perform matrix multiplication ---
+  printf("\nPerforming Matrix Multiplication...\n");
+  result_mat = mat_mult(mat1, mat2);
+  if (!result_mat)
+  {
+    fprintf(stderr, "Error: Matrix multiplication failed (incompatible dimensions or memory allocation issue).\n");
+    // Specific error message for dimension mismatch already printed by mat_mult
+    mat_destroy(mat1);
+    mat_destroy(mat2);
+    return 1;
+  }
+
+  printf("\n--- Result Matrix (Multiplication) ---\n");
+  print_mat(result_mat);
+
+  // --- Clean up memory ---
+  printf("\nCleaning up memory...\n");
+  mat_destroy(result_mat);
   mat_destroy(mat1);
   mat_destroy(mat2);
+
+  printf("Program finished successfully.\n");
   return 0;
 }
+
+// --- Helper Function to get Integer Dimensions ---
+// Returns the valid positive integer, or 0 if an error occurred or input was stopped.
+int get_dimension_input(const char *prompt_text)
+{
+  ReadResult ri;
+  int value;
+  while (1)
+  {
+    printf("%s", prompt_text);
+    ri = int_read_line();
+    if (ri.status == READ_ERR)
+    {
+      fprintf(stderr, "Error: %s. Please try again.\n", ri.data.err_str);
+      destroy_read_result(&ri);
+      continue;
+    }
+    else if (ri.status == READ_STOPPED)
+    {
+      fprintf(stderr, "Input stopped by user. Exiting.\n");
+      destroy_read_result(&ri);
+      return 0; // Indicate stopping to main
+    }
+    else // READ_OK
+    {
+      value = *(int *)ri.data.ok;
+      destroy_read_result(&ri); // Free allocated data
+      if (value < 1)
+      { // Dimensions must be positive integers
+        fprintf(stderr, "Error: Dimensions must be positive integers (>= 1). Please try again.\n");
+        continue;
+      }
+      return value;
+    }
+  }
+}
+
+// --- Matrix Utility Functions ---
 
 // allocates memory for a matrix with nrows rows and ncols columns
 Mat *mat_new(int nrows, int ncols)
 {
   Mat *mat = malloc(sizeof(Mat));
+  if (!mat)
+  {
+    fprintf(stderr, "Memory allocation failed for Mat struct.\n");
+    return NULL;
+  }
   mat->nrows = nrows;
   mat->ncols = ncols;
+
   mat->rows = vec_new(sizeof(Vec *), nrows);
+  if (!mat->rows)
+  {
+    fprintf(stderr, "Memory allocation failed for rows vector.\n");
+    free(mat);
+    return NULL;
+  }
+
+  // Allocate each row vector
   for (int i = 0; i < nrows; i++)
   {
     Vec *row = vec_new(sizeof(int), ncols);
-    vec_append(mat->rows, &row);
+    if (!row)
+    {
+      fprintf(stderr, "Memory allocation failed for row %d.\n", i);
+      // Clean up already allocated rows and the main vector before returning NULL
+      for (int k = 0; k < i; k++)
+      {
+        vec_destroy(*(Vec **)vec_get(mat->rows, k));
+      }
+      vec_destroy(mat->rows); // Destroy the vector storing row pointers
+      free(mat);              // Free the Mat struct itself
+      return NULL;
+    }
+    vec_append(mat->rows, &row); // Append pointer to the new row vector
   }
   return mat;
 }
@@ -119,27 +218,52 @@ void matrix_set(Mat *mat, int i, int j, int value)
 }
 
 // reads the elements of the matrix from the user
-void mat_input(Mat *mat)
+ReadResult mat_input(Mat *mat)
 {
+  ReadResult value_result;
   for (int i = 0; i < mat->nrows; i++)
   {
     for (int j = 0; j < mat->ncols; j++)
     {
-      printf("Enter element at row %d, column %d: ", i, j);
-      int value = get_int().value;
-      matrix_set(mat, i, j, value);
+      while (1)
+      {
+        printf("Enter element at row %d, column %d: ", i + 1, j + 1); // User-friendly 1-based indexing
+        value_result = int_read_line();
+        if (value_result.status == READ_ERR)
+        {
+          fprintf(stderr, "Error: %s. Please try again.\n", value_result.data.err_str);
+          destroy_read_result(&value_result);
+          continue;
+        }
+        else if (value_result.status == READ_STOPPED)
+        {
+          fprintf(stderr, "Input stopped by user.\n");
+          // Important: Return READ_STOPPED so main can clean up
+          return (ReadResult){READ_STOPPED, .data.ok = NULL};
+        }
+        matrix_set(mat, i, j, *(int *)value_result.data.ok);
+        destroy_read_result(&value_result); // Destroy the result after use
+        break;
+      }
     }
   }
+  return (ReadResult){READ_OK, .data.ok = NULL}; // Indicate success
 }
 
 // prints the matrix to the screen
 void print_mat(Mat *mat)
 {
+  if (mat == NULL)
+  { // Handle case where matrix is NULL
+    printf("Cannot print a NULL matrix.\n");
+    return;
+  }
+  printf("Matrix (%dx%d):\n", mat->nrows, mat->ncols);
   for (int i = 0; i < mat->nrows; i++)
   {
     for (int j = 0; j < mat->ncols; j++)
     {
-      printf("%d ", matrix_get(mat, i, j));
+      printf("%d\t", matrix_get(mat, i, j)); // Use tab for better spacing
     }
     printf("\n");
   }
@@ -148,23 +272,32 @@ void print_mat(Mat *mat)
 // returns the product of the two matrices
 Mat *mat_mult(Mat *mat1, Mat *mat2)
 {
-  if (mat1->ncols != mat2->nrows)
+  if (mat1 == NULL || mat2 == NULL)
   {
-    fprintf(stderr, "Error: Incompatible matrix dimensions for multiplication\n");
+    fprintf(stderr, "Error: Cannot multiply a NULL matrix.\n");
     return NULL;
   }
+  if (mat1->ncols != mat2->nrows)
+  {
+    fprintf(stderr, "Error: Incompatible matrix dimensions for multiplication. "
+                    "Number of columns in first matrix (%d) must equal number of rows in second matrix (%d).\n",
+            mat1->ncols, mat2->nrows);
+    return NULL;
+  }
+
   Mat *result = mat_new(mat1->nrows, mat2->ncols);
   if (!result)
   {
-    fprintf(stderr, "Error: Memory allocation failed\n");
+    fprintf(stderr, "Error: Memory allocation failed for result matrix in multiplication.\n");
     return NULL;
   }
+
   for (int i = 0; i < result->nrows; i++)
   {
     for (int j = 0; j < result->ncols; j++)
     {
       int sum = 0;
-      for (int k = 0; k < mat1->ncols; k++)
+      for (int k = 0; k < mat1->ncols; k++) // mat1->ncols is same as mat2->nrows
       {
         sum += matrix_get(mat1, i, k) * matrix_get(mat2, k, j);
       }
@@ -174,58 +307,27 @@ Mat *mat_mult(Mat *mat1, Mat *mat2)
   return result;
 }
 
-// gets an integer from the user
-ResultGetInt get_int()
-{
-  int result;
-
-  while (1)
-  {
-    String *s = String_new(0);
-    if (!s)
-    {
-      return (ResultGetInt){GET_ERR, 0, "memory allocation failed\n"};
-    }
-    printf("enter integer: ");
-    ResultString rs = String_read_line(s);
-    if (rs.status == RESULT_ERR)
-    {
-      fprintf(stderr, "Error: %s\n", rs.data.err);
-      String_destroy(s); // Free memory before continuing
-      continue;
-    }
-    else
-    {
-      if (*s->data == 'q')
-      {
-        String_destroy(s); // Free memory before breaking
-        return (ResultGetInt){GET_STOPPED, 0, NULL};
-      }
-      ResultInt ri = parse_to_int(s->data);
-      if (ri.status == RESULT_ERR)
-      {
-        fprintf(stderr, "Error: %s\n", ri.data.err);
-        String_destroy(s); // Free memory before continuing
-        continue;
-      }
-      else
-      {
-        result = ri.data.ok;
-        String_destroy(s); // Free memory before breaking
-        break;
-      }
-    }
-  }
-  return (ResultGetInt){GET_OK, result, NULL};
-}
-
-// frees memory allocated for the matrix  
+// frees memory allocated for the matrix
 void mat_destroy(Mat *mat)
 {
-  for (int i = 0; i < mat->nrows; i++)
+  if (mat == NULL)
   {
-    vec_destroy(*(Vec **)vec_get(mat->rows, i));
+    return; // Nothing to destroy if matrix pointer is NULL
   }
-  vec_destroy(mat->rows);
+  if (mat->rows != NULL)
+  {
+    // Destroy each row vector pointed to by the 'rows' vector
+    for (int i = 0; i < mat->nrows; i++)
+    {
+      Vec *row = *(Vec **)vec_get(mat->rows, i);
+      if (row != NULL) // Defensive check, though vec_new should ensure non-NULL
+      {
+        vec_destroy(row);
+      }
+    }
+    // Destroy the vector that holds pointers to the rows
+    vec_destroy(mat->rows);
+  }
+  // Finally, free the Mat struct itself
   free(mat);
 }

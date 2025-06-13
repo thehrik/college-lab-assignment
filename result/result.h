@@ -5,37 +5,57 @@
 
 typedef enum
 {
-  RESULT_OK,
-  RESULT_ERR
-} ResultStatus;
+  OK,
+  ERR
+} Status;
 
 typedef struct
 {
-  ResultStatus status;
+  Status status;
   union
   {
-    int ok;          // (valid if status == RESULT_OK)
-    const char *err; // Error message (valid if status == RESULT_ERR)
+    void *ok;        // (valid if status == OK)
+    const char *err_str; // Error message (valid if status == RESULT_ERR)
   } data;
-} ResultInt;
+} Result;
+
+typedef enum
+{
+  READ_OK,
+  READ_ERR,
+  READ_STOPPED,
+} ReadStatus;
 
 typedef struct
 {
-  ResultStatus status;
+  ReadStatus status;
   union
   {
-    String *ok;      // (valid if status == RESULT_OK)
-    const char *err; // Error message (valid if status == RESULT_ERR)
+    void *ok;
+    const char *err_str;
+  } data;
+} ReadResult;
+
+int destroy_result(Result *r);
+int destroy_read_result(ReadResult *r);
+
+typedef struct
+{
+  Status status;
+  union
+  {
+    String *ok;      // (valid if status == OK)
+    const char *err_str; // Error message (valid if status == RESULT_ERR)
   } data;
 } ResultString;
 
 typedef struct
 {
-  ResultStatus status;
+  Status status;
   union
   {
-    Vec *ok;      // (valid if status == RESULT_OK)
-    const char *err; // Error message (valid if status == RESULT_ERR)
+    Vec *ok;         // (valid if status == OK)
+    const char *err_str; // Error message (valid if status == RESULT_ERR)
   } data;
 } ResultVecInt;
 

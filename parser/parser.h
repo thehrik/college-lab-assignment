@@ -3,6 +3,6 @@
 
 #include "../result/result.h"
 
-ResultInt parse_to_int(const char *str);
+Result parse_to_int(const char *str);
 
 #endif // PARSER_H
