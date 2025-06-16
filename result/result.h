@@ -39,24 +39,5 @@ typedef struct
 int destroy_result(Result *r);
 int destroy_read_result(ReadResult *r);
 
-typedef struct
-{
-  Status status;
-  union
-  {
-    String *ok;      // (valid if status == OK)
-    const char *err_str; // Error message (valid if status == RESULT_ERR)
-  } data;
-} ResultString;
-
-typedef struct
-{
-  Status status;
-  union
-  {
-    Vec *ok;         // (valid if status == OK)
-    const char *err_str; // Error message (valid if status == RESULT_ERR)
-  } data;
-} ResultVecInt;
 
 #endif // RESULT_H

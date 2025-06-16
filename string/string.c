@@ -50,46 +50,6 @@ void String_destroy(String *s)
   }
 }
 
-// ResultString String_read_line(String *s)
-// {
-//   if (!s)
-//   {
-//     return (ResultString){ERR, .data.err_str = "Null String pointer"};
-//   }
-
-//   s->length = 0; // Reset the string for new input
-//   if (s->capacity == 0)
-//   {
-//     s->data = malloc(16);
-//     if (!s->data)
-//     {
-//       return (ResultString){ERR, .data.err_str = "Memory allocation failed"};
-//     }
-//     s->capacity = 16;
-//     s->data[0] = '\0';
-//   }
-
-//   while (1)
-//   {
-//     int c = getchar();
-//     if (c == '\n' || c == EOF)
-//       break;
-
-//     char ch[2] = {(char)c, '\0'};
-//     if (!String_append(s, ch))
-//     {
-//       return (ResultString){ERR, .data.err_str = "Memory allocation failed"};
-//     }
-//   }
-
-//   if (s->length == 0 && feof(stdin))
-//   {
-//     return (ResultString){ERR, .data.err_str = "EOF reached without reading any data"};
-//   }
-
-//   return (ResultString){OK, .data.ok = s};
-// }
-
 Result String_read_line(String *s)
 {
   if (!s)
