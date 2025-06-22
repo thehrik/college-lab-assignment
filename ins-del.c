@@ -3,7 +3,6 @@
 #include <string.h>
 #include "./string/string.h" // Assuming String_new, String_read_line, String_destroy, ResultString, ERR
 #include "./result/result.h" // Assuming Result, ERR, OK (for parse_to_int if used directly)
-#include "./parser/parser.h" // Assuming parse_to_int
 #include "./vector/vector.h" // Assuming vec_new, vec_destroy, vec_append, vec_get, etc.
 #include "./input/input.h"   // Assuming int_read_line, destroy_read_result, ReadResult, READ_ERR, READ_OK, READ_STOPPED
 #include "./types/types.h"   // Assuming common type definitions like ReadResult (if not already in input.h)

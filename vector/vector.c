@@ -1,7 +1,6 @@
 #include "vector.h"
 #include <stdlib.h>
 #include <string.h>
-#include "../result/result.h"
 #include "../types/types.h"
 
 Vec *vec_new(size_t elem_size, size_t init_capacity)

@@ -1,5 +1,7 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
 #include "./string/string.h"
 #include "./result/result.h"
 #include "./parser/parser.h"
@@ -8,17 +10,15 @@
 
 void main()
 {
-  // String *s = String_new(0);
-  // if (!s)
-  // {
-  //   fprintf(stderr, "Error: Memory allocation failed\n");
-  //   return;
-  // }
-  // Result r = String_read_line(s);
-  // printf("%s", s->data);
-  // printf("%s", (char*)r.data.ok);
-  ReadResult ri = int_read_line();
-  printf("%d", *(int *)ri.data.ok);
-
+  void* a = malloc(sizeof(u_int8_t));
+  void* b = malloc(sizeof(u_int8_t));
+  *(u_int16_t*)a = 1000;
+  *(u_int8_t*) b = 100;
+  
+  printf("%d \n", *(u_int8_t*)a);
+  printf("%d \n", a);
+  printf("%d \n", *(u_int8_t*)++a);
+  printf("%d \n", b);
+  printf("%d \n", *(u_int8_t*)(b));
   return;
 }
